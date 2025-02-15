@@ -1,0 +1,25 @@
+{
+  "name": "adventure",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "@langchain/ollama": "^0.2.0",
+    "@langchain/openai": "^0.4.4",
+    "node-fetch": "^3.3.2",
+    "readline-sync": "^1.4.10",
+    "zod": "^3.24.2"
+  },
+  "devDependencies": {
+    "@types/node-fetch": "^2.6.12",
+    "@types/readline-sync": "^1.4.8",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.7.3"
+  }
+}
