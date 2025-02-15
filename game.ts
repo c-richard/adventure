@@ -1,92 +1,85 @@
-import { ChatOllama } from "@langchain/ollama";
-import {
-  Annotation,
-  END,
-  MemorySaver,
-  MessagesAnnotation,
-  START,
-  StateGraph,
-} from "@langchain/langgraph";
-import { v4 as uuidv4 } from "uuid";
-import readlineSync from "readline-sync";
+import "cheerio";
+import { ChatOllama, OllamaEmbeddings } from "@langchain/ollama";
+import { Annotation, StateGraph } from "@langchain/langgraph";
+import { pull } from "langchain/hub";
 import { ChatPromptTemplate } from "@langchain/core/prompts";
-import { trimMessages } from "@langchain/core/messages";
+import { MemoryVectorStore } from "langchain/vectorstores/memory";
+import { RecursiveCharacterTextSplitter } from "@langchain/textsplitters";
+import { CheerioWebBaseLoader } from "@langchain/community/document_loaders/web/cheerio";
+
+const cheerioLoader = new CheerioWebBaseLoader(
+  "https://memory-alpha.fandom.com/wiki/Lower_intestinal_tract",
+  {
+    selector: "p",
+  }
+);
+
+const embeddings = new OllamaEmbeddings({
+  model: "mistral:7b",
+});
+
+const vectorStore = new MemoryVectorStore(embeddings);
 
 const model = new ChatOllama({
   model: "mistral:7b",
   baseUrl: "http://localhost:11434",
 });
 
-const promptTemplate = ChatPromptTemplate.fromMessages([
-  [
-    "system",
-    "You are the narrator of a text adventure game. The player is on an adventure that follows this plot: {plot}. Respond based on the player's actions, which will shape the progression of the story. Describe the environment and choices the player faces at each step, and await their response to continue the narrative. Ensure that the player's actions drive the story forward.",
-  ],
-  [
-    "assistant",
-    "You, as the narrator, describe the consequences of the player's action. Include details about the environment and any immediate changes. Maintain the flow of the story with the player's choices influencing what happens next. The story should evolve based on the player's interactions.",
-  ],
-  ["placeholder", "{messages}"],
-]);
+const start = async () => {
+  const docs = await cheerioLoader.load();
 
-const trimmer = trimMessages({
-  maxTokens: 10,
-  strategy: "last",
-  tokenCounter: (msgs) => msgs.length,
-  includeSystem: true,
-  allowPartial: false,
-  startOn: "human",
-});
+  console.log(`Total characters: ${docs[0].pageContent.length}`);
 
-const GraphAnnotation = Annotation.Root({
-  ...MessagesAnnotation.spec,
-  plot: Annotation<string>(),
-});
+  const splitter = new RecursiveCharacterTextSplitter({
+    chunkSize: 1000,
+    chunkOverlap: 200,
+  });
+  const allSplits = await splitter.splitDocuments(docs);
 
-const callModel = async (state: typeof GraphAnnotation.State) => {
-  const trimmedMessages = await trimmer.invoke(state.messages);
-  const prompt = await promptTemplate.invoke({
-    messages: trimmedMessages,
-    plot: state.plot,
+  await vectorStore.addDocuments(allSplits);
+
+  const promptTemplate = await pull<ChatPromptTemplate>("rlm/rag-prompt");
+  const InputStateAnnotation = Annotation.Root({
+    question: Annotation<string>,
   });
 
-  const response = await model.invoke(prompt);
-  return { messages: response };
-};
+  const StateAnnotation = Annotation.Root({
+    question: Annotation<string>,
+    context: Annotation<Document[]>,
+    answer: Annotation<string>,
+  });
 
-const workflow = new StateGraph(GraphAnnotation)
-  .addNode("model", callModel)
-  .addEdge(START, "model")
-  .addEdge("model", END);
+  const retreive = async (state: typeof InputStateAnnotation.State) => {
+    const retreivedDocs = await vectorStore.similaritySearch(state.question);
+    return { context: retreivedDocs };
+  };
 
-const app = workflow.compile({ checkpointer: new MemorySaver() });
+  const generate = async (state: typeof StateAnnotation.State) => {
+    const docsContent = state.context;
 
-const start = async () => {
-  const config = { configurable: { thread_id: uuidv4() } };
+    const messages = await promptTemplate.invoke({
+      question: state.question,
+      context: docsContent,
+    });
+    const response = await model.invoke(messages);
+    return { answer: response.content };
+  };
 
-  console.log(
-    ` ${config.configurable.thread_id} (type "exit" to end session) `
-  );
+  // Compile application and test
+  const graph = new StateGraph(StateAnnotation)
+    .addNode("retrieve", retreive)
+    .addNode("generate", generate)
+    .addEdge("__start__", "retrieve")
+    .addEdge("retrieve", "generate")
+    .addEdge("generate", "__end__")
+    .compile();
 
-  let input = "look";
+  console.log("A");
 
-  while (input !== "exit") {
-    const output = await app.invoke(
-      {
-        messages: [
-          {
-            role: "user",
-            content: input,
-          },
-        ],
-        plot: "Escape a ship at sea",
-      },
-      config
-    );
+  let inputs = { question: "Do hirogen collect intestines?" };
 
-    console.log(output.messages[output.messages.length - 1].content);
-    input = readlineSync.question(" > ");
-  }
+  const result = await graph.invoke(inputs);
+  console.log(result.answer);
 };
 
 start();
