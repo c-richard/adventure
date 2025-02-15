@@ -10,6 +10,7 @@ import {
 import { v4 as uuidv4 } from "uuid";
 import readlineSync from "readline-sync";
 import { ChatPromptTemplate } from "@langchain/core/prompts";
+import { trimMessages } from "@langchain/core/messages";
 
 const model = new ChatOllama({
   model: "mistral:7b",
@@ -28,13 +29,27 @@ const promptTemplate = ChatPromptTemplate.fromMessages([
   ["placeholder", "{messages}"],
 ]);
 
+const trimmer = trimMessages({
+  maxTokens: 10,
+  strategy: "last",
+  tokenCounter: (msgs) => msgs.length,
+  includeSystem: true,
+  allowPartial: false,
+  startOn: "human",
+});
+
 const GraphAnnotation = Annotation.Root({
   ...MessagesAnnotation.spec,
   plot: Annotation<string>(),
 });
 
 const callModel = async (state: typeof GraphAnnotation.State) => {
-  const prompt = await promptTemplate.invoke(state);
+  const trimmedMessages = await trimmer.invoke(state.messages);
+  const prompt = await promptTemplate.invoke({
+    messages: trimmedMessages,
+    plot: state.plot,
+  });
+
   const response = await model.invoke(prompt);
   return { messages: response };
 };
