@@ -1,53 +1,57 @@
 import { ChatOllama } from "@langchain/ollama";
-import { ChatPromptTemplate } from "@langchain/core/prompts";
+import {
+  END,
+  MemorySaver,
+  MessagesAnnotation,
+  START,
+  StateGraph,
+} from "@langchain/langgraph";
+import { v4 as uuidv4 } from "uuid";
+import readlineSync from "readline-sync";
 
-import { z } from "zod";
-import { tool } from "@langchain/core/tools";
-
-const moveSchema = z.object({
-  direction: z
-    .enum(["west", "east", "south", "north"])
-    .describe("The direction to move the player"),
-});
-
-const moveTool = tool(
-  async ({ direction }) => {
-    return `Player has moved ${direction}`;
-  },
-  {
-    name: "player mover",
-    description: "Can move a player as the result of an action",
-    schema: moveSchema,
-  }
-);
-
-const responseStructure = z.object({
-  roomName: z.string().describe("The name of the current room"),
-  description: z.string().describe("A concise description of the current room"),
-  objects: z
-    .array(z.string())
-    .describe("A short list of important objects in the room"),
-});
-
-// Initialize Ollama with Mistral
 const model = new ChatOllama({
   model: "mistral:7b",
   baseUrl: "http://localhost:11434",
-}).withStructuredOutput(responseStructure, { name: "Response structure" });
+});
+
+const callModel = async (state: typeof MessagesAnnotation.State) => {
+  const response = await model.invoke(state.messages);
+  return { messages: response };
+};
+
+const workflow = new StateGraph(MessagesAnnotation)
+  .addNode("model", callModel)
+  .addEdge(START, "model")
+  .addEdge("model", END);
+
+const memory = new MemorySaver();
+const app = workflow.compile({ checkpointer: memory });
 
 const start = async () => {
-  const promptTemplate = ChatPromptTemplate.fromMessages([
-    ["system", "Describe a response to the users actionn"],
-    ["user", "{action}"],
-  ]);
+  const config = { configurable: { thread_id: uuidv4() } };
 
-  const promptValue = await promptTemplate.invoke({
-    action: "look around",
-  });
+  console.log(
+    ` ${config.configurable.thread_id} (type "exit" to end session) `
+  );
 
-  const response = await model.invoke(promptValue);
+  let input = readlineSync.question(" > ");
 
-  console.log(response);
+  while (input !== "exit") {
+    const output = await app.invoke(
+      {
+        messages: [
+          {
+            role: "user",
+            content: input,
+          },
+        ],
+      },
+      config
+    );
+
+    console.log(output.messages[output.messages.length - 1].content);
+    input = readlineSync.question(" > ");
+  }
 };
 
 start();

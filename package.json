@@ -10,10 +10,13 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "@langchain/core": "^0.3.40",
+    "@langchain/langgraph": "^0.2.46",
     "@langchain/ollama": "^0.2.0",
     "@langchain/openai": "^0.4.4",
     "node-fetch": "^3.3.2",
     "readline-sync": "^1.4.10",
+    "uuid": "^11.0.5",
     "zod": "^3.24.2"
   },
   "devDependencies": {
