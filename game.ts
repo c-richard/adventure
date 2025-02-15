@@ -53,8 +53,6 @@ const retreiveSchema = z.object({ query: z.string() });
 const start = async () => {
   const docs = await cheerioLoader.load();
 
-  console.log(`Total characters: ${docs[0].pageContent.length}`);
-
   const splitter = new RecursiveCharacterTextSplitter({
     chunkSize: 1000,
     chunkOverlap: 200,
@@ -62,6 +60,19 @@ const start = async () => {
   const allSplits = await splitter.splitDocuments(docs);
 
   await vectorStore.addDocuments(allSplits);
+
+  const randomTool = tool(
+    async () => {
+      console.log("rolling");
+      return Math.random().toString();
+    },
+    {
+      name: "random number generator",
+      description: "Generates a random floating point number",
+      schema: z.never(),
+      responseFormat: "content",
+    }
+  );
 
   const retreiveTool = tool(
     async ({ query }) => {
@@ -80,75 +91,13 @@ const start = async () => {
     }
   );
 
-  async function queryOrResponse(state: typeof MessagesAnnotation.State) {
-    console.log("query or respond");
-    const modelWithTools = model.bindTools([retreiveTool]);
-    const response = await modelWithTools.invoke(state.messages);
-    return { messages: [response] };
-  }
-
-  const tools = new ToolNode([retreiveTool]);
-
-  // Step 3: Generate a response using the retrieved content.
-  async function generate(state: typeof MessagesAnnotation.State) {
-    console.log("generating");
-    // Get generated ToolMessages
-    let recentToolMessages = [];
-    for (let i = state["messages"].length - 1; i >= 0; i--) {
-      let message = state["messages"][i];
-      if (message instanceof ToolMessage) {
-        recentToolMessages.push(message);
-      } else {
-        break;
-      }
-    }
-    let toolMessages = recentToolMessages.reverse();
-
-    // Format into prompt
-    const docsContent = toolMessages.map((doc) => doc.content).join("\n");
-    const systemMessageContent =
-      "You are an assistant for question-answering tasks. " +
-      "Use the following pieces of retrieved context to answer " +
-      "the question. If you don't know the answer, say that you " +
-      "don't know. Use three sentences maximum and keep the " +
-      "answer concise." +
-      "\n\n" +
-      `${docsContent}`;
-
-    const conversationMessages = state.messages.filter(
-      (message) =>
-        message instanceof HumanMessage ||
-        message instanceof SystemMessage ||
-        (message instanceof AIMessage && message?.tool_calls?.length == 0)
-    );
-    const prompt = [
-      new SystemMessage(systemMessageContent),
-      ...conversationMessages,
-    ];
-
-    // Run
-    const response = await model.invoke(prompt);
-    return { messages: [response] };
-  }
-
-  const graphBuilder = new StateGraph(MessagesAnnotation)
-    .addNode("queryOrRespond", queryOrResponse)
-    .addNode("tools", tools)
-    .addNode("generate", generate)
-    .addEdge("__start__", "queryOrRespond")
-    .addConditionalEdges("queryOrRespond", toolsCondition, {
-      __end__: "__end__",
-      tools: "tools",
-    })
-    .addEdge("tools", "generate")
-    .addEdge("generate", "__end__");
-
-  const graph = graphBuilder.compile();
-
-  const agent = createReactAgent({ llm: model, tools: [retreiveTool] });
+  const agent = createReactAgent({
+    llm: model,
+    tools: [retreiveTool, randomTool],
+  });
 
   let result = await agent.invoke({
-    messages: ["Hello I am jeff"],
+    messages: ["Give me a random float"],
   });
 
   result.messages.map(prettyPrint);
