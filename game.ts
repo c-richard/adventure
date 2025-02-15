@@ -6,13 +6,29 @@ import { RecursiveCharacterTextSplitter } from "@langchain/textsplitters";
 import { CheerioWebBaseLoader } from "@langchain/community/document_loaders/web/cheerio";
 import { z } from "zod";
 import { tool } from "@langchain/core/tools";
-import { ToolNode, toolsCondition } from "@langchain/langgraph/prebuilt";
+import {
+  createReactAgent,
+  ToolNode,
+  toolsCondition,
+} from "@langchain/langgraph/prebuilt";
 import {
   AIMessage,
   HumanMessage,
   SystemMessage,
   ToolMessage,
 } from "@langchain/core/messages";
+import { BaseMessage, isAIMessage } from "@langchain/core/messages";
+
+const prettyPrint = (message: BaseMessage) => {
+  let txt = `[${message._getType()}]: ${message.content}`;
+  if ((isAIMessage(message) && message.tool_calls?.length) || 0 > 0) {
+    const tool_calls = (message as AIMessage)?.tool_calls
+      ?.map((tc) => `- ${tc.name}(${JSON.stringify(tc.args)})`)
+      .join("\n");
+    txt += ` \nTools: \n${tool_calls}`;
+  }
+  console.log(txt);
+};
 
 const cheerioLoader = new CheerioWebBaseLoader(
   "https://memory-alpha.fandom.com/wiki/Lower_intestinal_tract",
@@ -129,11 +145,21 @@ const start = async () => {
 
   const graph = graphBuilder.compile();
 
-  const result = await graph.invoke({
-    messages: ["What is a fish?"],
+  const agent = createReactAgent({ llm: model, tools: [retreiveTool] });
+
+  let result = await agent.invoke({
+    messages: ["Hello I am jeff"],
   });
 
-  console.log(result.messages[result.messages.length - 1].content);
+  result.messages.map(prettyPrint);
+
+  // console.log("----\n");
+
+  // result = await agent.invoke({
+  //   messages: ["What is my name?"],
+  // });
+
+  // console.log(result.messages[result.messages.length - 1].content);
 
   // const result2 = await graph.invoke({
   //   messages: ["Who does what?"],
