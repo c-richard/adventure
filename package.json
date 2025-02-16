@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "start": "npx tsx main.ts"
+    "start": "npx tsx src/main.ts"
   },
   "keywords": [],
   "author": "",
