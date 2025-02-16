@@ -1,5 +1,5 @@
-export type Option = {
-  action: string;
+export type Action = {
+  name: string;
   result: string;
   next_room?: string;
   end_game?: boolean;
@@ -11,7 +11,7 @@ export type Option = {
 export type Room = {
   title: string;
   description: string;
-  options: Option[];
+  actions: Action[];
 };
 
 export type Adventure = {

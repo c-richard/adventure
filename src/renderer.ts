@@ -1,8 +1,8 @@
 import chalk from "chalk";
-import { Option, Room } from "./types";
+import { Action, Room } from "./types";
 
 export class Renderer {
-  public static actionEffect(action: Option) {
+  public static actionEffect(action: Action) {
     console.log(chalk.yellow(action.result));
     console.log();
   }

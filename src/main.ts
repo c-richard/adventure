@@ -1,5 +1,5 @@
 import adventureJson from "../adventure.json";
-import { Adventure, Option, Room } from "./types";
+import { Adventure, Action, Room } from "./types";
 import { Renderer } from "./renderer";
 import { getPlayerInput } from "./getPlayerInput";
 import {
@@ -16,7 +16,7 @@ const StateAnnotation = Annotation.Root({
   currentRoom: Annotation<Room>,
   actionHistory: Annotation<string[]>,
   ended: Annotation<string>,
-  lastAction: Annotation<Option>,
+  lastAction: Annotation<Action>,
 });
 
 const getRoom = (roomKey: keyof typeof adventure.rooms) => {
@@ -50,8 +50,8 @@ const PlayerInputNode = async (state: typeof StateAnnotation.State) => {
     });
   }
 
-  const action = state.currentRoom.options.find(
-    (op) => op.action === playerInput
+  const action = state.currentRoom.actions.find(
+    (op) => op.name === playerInput
   );
 
   if (action !== undefined) {
@@ -92,7 +92,7 @@ const Action = async (state: typeof StateAnnotation.State) => {
 
   return new Command({
     update: {
-      actionHistory: [...state.actionHistory, state.lastAction.action],
+      actionHistory: [...state.actionHistory, state.lastAction.name],
       currentRoom: state.lastAction.next_room
         ? adventure.rooms[
             state.lastAction.next_room as keyof typeof adventure.rooms
