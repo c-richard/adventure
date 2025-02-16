@@ -40,7 +40,7 @@
             "result": "You walk through the hidden passage and escape the mansion. Well done!",
             "end_game": true,
             "conditions": {
-              "requiredAction": "examine the tome"
+              "requiredAction": "examine tome"
             }
           }
         ]

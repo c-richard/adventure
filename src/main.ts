@@ -1,54 +1,141 @@
 import adventureJson from "../adventure.json";
-import { Adventure } from "./types";
+import { Adventure, Option, Room } from "./types";
 import { Renderer } from "./renderer";
 import { getPlayerInput } from "./getPlayerInput";
+import {
+  Annotation,
+  Command,
+  interrupt,
+  MemorySaver,
+  StateGraph,
+} from "@langchain/langgraph";
 
 const adventure = adventureJson as Adventure;
 
-Renderer.intro(adventure.title, adventure.intro);
+const StateAnnotation = Annotation.Root({
+  currentRoom: Annotation<Room>,
+  actionHistory: Annotation<string[]>,
+  ended: Annotation<string>,
+  lastAction: Annotation<Option>,
+});
 
-let currentRoom =
-  adventure.rooms[adventure.initialRoom as keyof typeof adventure.rooms];
+const getRoom = (roomKey: keyof typeof adventure.rooms) => {
+  return adventure.rooms[roomKey];
+};
 
-let actionHistory: string[] = [];
+const IntroNode = async () => {
+  Renderer.intro(adventure.title, adventure.intro);
 
-while (true) {
-  const line = getPlayerInput();
+  return {
+    currentRoom: getRoom(adventure.initialRoom),
+    actionHistory: [],
+  };
+};
 
-  if (line === "quit") {
-    break;
+const PlayerInputNode = async (state: typeof StateAnnotation.State) => {
+  const playerInput = interrupt("player_input");
+
+  if (playerInput === "quit") {
+    return new Command({
+      update: {
+        ended: "ended",
+      },
+      goto: "__end__",
+    });
   }
 
-  if (line === "look") {
-    Renderer.room(currentRoom);
-    continue;
+  if (playerInput === "look") {
+    return new Command({
+      goto: "look",
+    });
   }
 
-  const matchingOption = currentRoom.options.find((op) => op.action === line);
-  if (matchingOption !== undefined) {
-    const requiredAction = matchingOption.conditions?.requiredAction;
-    if (requiredAction && actionHistory.includes(requiredAction) === false) {
-      Renderer.inputFailure();
-      continue;
-    }
+  const action = state.currentRoom.options.find(
+    (op) => op.action === playerInput
+  );
 
-    actionHistory.push(matchingOption.action);
+  if (action !== undefined) {
+    return new Command({
+      update: {
+        lastAction: action,
+      },
+      goto: "action",
+    });
+  }
 
-    Renderer.actionEffect(matchingOption);
+  return new Command({
+    goto: "inputFailure",
+  });
+};
 
-    if (matchingOption.next_room !== undefined) {
-      currentRoom =
-        adventure.rooms[
-          matchingOption.next_room as keyof typeof adventure.rooms
-        ];
-    }
+const LookNode = async (state: typeof StateAnnotation.State) => {
+  Renderer.room(state.currentRoom);
+};
 
-    if (matchingOption.end_game) {
+const InputFailure = async () => {
+  Renderer.inputFailure();
+};
+
+const Action = async (state: typeof StateAnnotation.State) => {
+  const requiredAction = state.lastAction.conditions?.requiredAction;
+
+  if (
+    requiredAction &&
+    state.actionHistory.includes(requiredAction) === false
+  ) {
+    return new Command({
+      goto: "inputFailure",
+    });
+  }
+
+  Renderer.actionEffect(state.lastAction);
+
+  return new Command({
+    update: {
+      actionHistory: [...state.actionHistory, state.lastAction.action],
+      currentRoom: state.lastAction.next_room
+        ? adventure.rooms[
+            state.lastAction.next_room as keyof typeof adventure.rooms
+          ]
+        : state.currentRoom,
+      ended: state.lastAction.end_game,
+    },
+    goto: "playerInput",
+  });
+};
+
+const checkpointer = new MemorySaver();
+const graph = new StateGraph(StateAnnotation)
+  .addNode("intro", IntroNode)
+  .addNode("playerInput", PlayerInputNode, {
+    ends: ["__end__", "look", "inputFailure", "action"],
+  })
+  .addNode("look", LookNode)
+  .addNode("inputFailure", InputFailure)
+  .addNode("action", Action, {
+    ends: ["inputFailure", "playerInput"],
+  })
+  .addEdge("__start__", "intro")
+  .addEdge("intro", "playerInput")
+  .addEdge("look", "playerInput")
+  .addEdge("inputFailure", "playerInput")
+  .compile({ checkpointer });
+
+const main = async () => {
+  const config = { configurable: { thread_id: "1" } };
+  await graph.invoke({}, config);
+
+  while (true) {
+    const playerInput = getPlayerInput();
+    const state = await graph.invoke(
+      new Command({ resume: playerInput }),
+      config
+    );
+
+    if (state.ended) {
       break;
     }
-
-    continue;
   }
+};
 
-  Renderer.inputFailure();
-}
+main();
