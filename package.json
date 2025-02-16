@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "npx ts-node main.ts"
   },
   "keywords": [],
   "author": "",
@@ -15,8 +15,6 @@
     "@langchain/langgraph": "^0.2.46",
     "@langchain/mistralai": "^0.2.0",
     "@langchain/ollama": "^0.2.0",
-    "@langchain/openai": "^0.4.4",
-    "cheerio": "^1.0.0",
     "langchain": "^0.3.15",
     "node-fetch": "^3.3.2",
     "readline-sync": "^1.4.10",
