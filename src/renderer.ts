@@ -7,8 +7,8 @@ export class Renderer {
     console.log();
   }
 
-  public static inputFailure() {
-    console.log(chalk.yellow("I can't help with that"));
+  public static inputFailure(reason: string) {
+    console.log(chalk.yellow(reason));
     console.log();
   }
 

@@ -12,6 +12,9 @@ export const Action = (adventure: Adventure) => async (state: GraphState) => {
     state.actionHistory.includes(requiredAction) === false
   ) {
     return new Command({
+      update: {
+        failedAction: state.lastAction.name,
+      },
       goto: "inputFailure",
     });
   }

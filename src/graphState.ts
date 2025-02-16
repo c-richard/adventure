@@ -13,6 +13,7 @@ export const StateAnnotation = (adventure: Adventure) =>
       default: () => [],
     }),
     ended: Annotation<string>,
+    failedAction: Annotation<string>,
     lastAction: Annotation<Action>,
   });
 
