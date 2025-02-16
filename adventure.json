@@ -9,14 +9,17 @@
         "actions": [
           {
             "name": "search",
+            "alternativeNames": [],
             "result": "You see only dust and old stone. The chest looks like it hasn't been opened in ages."
           },
           {
             "name": "open chest",
+            "alternativeNames": ["unlock chest", "open the chest", "pry open chest", "unseal chest", "unlatch chest", "lift lid", "crack open chest"],
             "result": "The chest is empty, but it smells faintly of wood and age."
           },
           {
             "name": "go north",
+            "alternativeNames": ["go door", "n", "enter door", "move north", "proceed north", "go through door"],
             "result": "You go north into the library",
             "next_room": "library"
           }
@@ -24,19 +27,22 @@
       },
       "library": {
         "title": "Library",
-        "description": "You step through the door and find yourself in a room lined with shelves, but most of the books are long rotted. A single tome rests on a pedestal in the center of the room. Its cover is intricately carved, but it’s difficult to read the title.",
+        "description": "You step through the door and find yourself in a room lined with shelves, but most of the books are long rotted. A single tome rests on a pedestal in the center of the room. Its cover is intricately carved, but it’s difficult to read the title. There is a door to the south",
         "actions": [
           {
             "name": "examine tome",
+            "alternativeNames": ["inspect tome", "look at tome", "read tome", "study tome", "open tome", "check tome", "peruse tome"],
             "result": "You open the tome, and a hidden passage opens behind the bookshelf."
           },
           {
             "name": "go south",
+            "alternativeNames": ["go door", "s", "enter door", "move south", "proceed south", "exit south"],
             "result": "You go south into the chamber",
             "next_room": "chamber"
           },
           {
             "name": "go passage",
+            "alternativeNames": ["enter passage", "walk passage", "enter hidden passage", "go through passage", "step through passage", "walk through secret passage"],
             "result": "You walk through the hidden passage and escape the mansion. Well done!",
             "end_game": true,
             "conditions": {
