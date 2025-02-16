@@ -1,0 +1,49 @@
+{
+    "title": "The Forgotten Hall",
+    "intro": "You awake in a dimly lit room. Dust hangs in the air, and the musty smell of old stone fills your nose. A faint breeze comes from the north.",
+    "initialRoom": "chamber",
+    "rooms": {
+      "chamber": {
+        "title": "Chamber",
+        "description": "You are in a small chamber. The walls are made of cold, gray stone, and the floor is covered in dust. There is a door to the north, and an old wooden chest sits in the corner.",
+        "options": [
+          {
+            "action": "search",
+            "result": "You see only dust and old stone. The chest looks like it hasn't been opened in ages."
+          },
+          {
+            "action": "open chest",
+            "result": "The chest is empty, but it smells faintly of wood and age."
+          },
+          {
+            "action": "go north",
+            "result": "You go north into the library",
+            "next_room": "library"
+          }
+        ]
+      },
+      "library": {
+        "title": "Library",
+        "description": "You step through the door and find yourself in a room lined with shelves, but most of the books are long rotted. A single tome rests on a pedestal in the center of the room. Its cover is intricately carved, but it’s difficult to read the title.",
+        "options": [
+          {
+            "action": "examine tome",
+            "result": "You open the tome, and a hidden passage opens behind the bookshelf."
+          },
+          {
+            "action": "go south",
+            "result": "You go south into the chamber",
+            "next_room": "chamber"
+          },
+          {
+            "action": "go passage",
+            "result": "You walk through the hidden passage and escape the mansion. Well done!",
+            "end_game": true,
+            "conditions": {
+              "requiredAction": "examine the tome"
+            }
+          }
+        ]
+      }
+    }
+  }
