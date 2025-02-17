@@ -2,6 +2,7 @@ import { Command } from "@langchain/langgraph";
 import { GraphState } from "../state";
 import { NODES } from "../nodes";
 import { Renderer } from "../../renderer";
+import { getRoom } from "../../utils";
 
 export const Action = async (state: GraphState) => {
   const requiredAction = state.lastAction.conditions?.requiredAction;
@@ -25,6 +26,10 @@ export const Action = async (state: GraphState) => {
   if (state.lastAction.roomDescription) {
     newAdventure.rooms[state.currentRoomKey].description =
       state.lastAction.roomDescription;
+  }
+
+  if (state.lastAction.next_room) {
+    Renderer.room(getRoom(state.currentAdventure, state.lastAction.next_room));
   }
 
   return new Command({
