@@ -25,7 +25,7 @@ Return a structured response with the key "action", where the value is one of th
 );
 
 export const Input = async (state: GraphState) => {
-  const playerInput = interrupt("player_input");
+  const playerInput = (interrupt("player_input") as string).toLowerCase();
 
   if (playerInput === "quit") {
     return new Command({
