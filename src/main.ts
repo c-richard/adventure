@@ -1,18 +1,24 @@
 import { Command } from "@langchain/langgraph";
-import { graph } from "./graph";
-import { getPlayerInput } from "./utils";
+import { graph } from "./graph/graph";
+import { eventsWithCurrentChain, getPlayerInput } from "./utils";
+import { Renderer } from "./renderer";
+import { NODES } from "./graph/nodes";
 
 const main = async () => {
   const config = { configurable: { thread_id: "1" } };
   await graph.invoke({}, config);
 
   while (true) {
-    const state = await graph.invoke(
+    const events = await graph.streamEvents(
       new Command({ resume: getPlayerInput() }),
-      config
+      { ...config, version: "v2" }
     );
 
-    if (state.ended) {
+    await Renderer.chunks(eventsWithCurrentChain(events), [NODES.FAILURE]);
+
+    const state = await graph.getState(config);
+
+    if (state.values.ended) {
       break;
     }
   }

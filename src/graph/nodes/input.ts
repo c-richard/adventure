@@ -1,5 +1,6 @@
 import { interrupt, Command } from "@langchain/langgraph";
-import { GraphState } from "../graphState";
+import { GraphState } from "../state";
+import { NODES } from "../nodes";
 import { ChatOllama } from "@langchain/ollama";
 import { PromptTemplate } from "@langchain/core/prompts";
 import { z } from "zod";
@@ -31,7 +32,7 @@ export const Input = async (state: GraphState) => {
       update: {
         ended: "ended",
       },
-      goto: "__end__",
+      goto: NODES.END,
     });
   }
 
@@ -61,12 +62,9 @@ export const Input = async (state: GraphState) => {
 
   const transformedInput = response.action;
 
-  console.log(transformedInput);
-  console.log();
-
   if (transformedInput === "look") {
     return new Command({
-      goto: "look",
+      goto: NODES.LOOK,
     });
   }
 
@@ -79,7 +77,7 @@ export const Input = async (state: GraphState) => {
       update: {
         lastAction: action,
       },
-      goto: "action",
+      goto: NODES.ACTION,
     });
   }
 
@@ -87,6 +85,6 @@ export const Input = async (state: GraphState) => {
     update: {
       failedAction: playerInput,
     },
-    goto: "inputFailure",
+    goto: NODES.FAILURE,
   });
 };

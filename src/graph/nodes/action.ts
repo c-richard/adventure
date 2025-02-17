@@ -1,8 +1,9 @@
 import { Command } from "@langchain/langgraph";
-import { GraphState } from "../graphState";
-import { Renderer } from "../renderer";
-import { getRoom } from "../utils";
-import { Adventure } from "../types";
+import { GraphState } from "../state";
+import { NODES } from "../nodes";
+import { Renderer } from "../../renderer";
+import { getRoom } from "../../utils";
+import { Adventure } from "../../types";
 
 export const Action = (adventure: Adventure) => async (state: GraphState) => {
   const requiredAction = state.lastAction.conditions?.requiredAction;
@@ -15,7 +16,7 @@ export const Action = (adventure: Adventure) => async (state: GraphState) => {
       update: {
         failedAction: state.lastAction.name,
       },
-      goto: "inputFailure",
+      goto: NODES.FAILURE,
     });
   }
 
@@ -29,6 +30,6 @@ export const Action = (adventure: Adventure) => async (state: GraphState) => {
         : state.currentRoom,
       ended: state.lastAction.end_game,
     },
-    goto: "playerInput",
+    goto: NODES.PLAYER_INPUT,
   });
 };

@@ -1,6 +1,5 @@
 import { ChatOllama } from "@langchain/ollama";
-import { GraphState } from "../graphState";
-import { Renderer } from "../renderer";
+import { GraphState } from "../state";
 import { PromptTemplate } from "@langchain/core/prompts";
 
 const model = new ChatOllama({
@@ -29,9 +28,5 @@ export const Failure = async (state: GraphState) => {
     failedAction,
   });
 
-  const response = await model.invoke(prompt);
-
-  const reason = response.content.toString();
-
-  Renderer.inputFailure(reason);
+  await model.invoke(prompt);
 };
