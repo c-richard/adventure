@@ -1,15 +1,15 @@
-import { interrupt, Command } from "@langchain/langgraph";
-import { GraphState } from "../state";
+import {
+  interrupt,
+  Command,
+  Annotation,
+  StateGraph,
+} from "@langchain/langgraph";
 import { NODES } from "../nodes";
-import { ChatOllama } from "@langchain/ollama";
 import { PromptTemplate } from "@langchain/core/prompts";
 import { z } from "zod";
 import { getRoom } from "../../utils";
-
-const model = new ChatOllama({
-  model: "llama3.2:3b",
-  temperature: 0.1,
-});
+import { Adventure } from "../../types";
+import { model } from "../../model";
 
 const promptTemplate = PromptTemplate.fromTemplate(
   `
@@ -25,16 +25,19 @@ Return a structured response with the key "action", where the value is one of th
   `
 );
 
-export const Input = async (state: GraphState) => {
+const InputStateAnnotation = Annotation.Root({
+  classifiedInput: Annotation<string>,
+  currentAdventure: Annotation<Adventure>,
+  currentRoomKey: Annotation<string>,
+});
+
+const InputClassifier = async (state: typeof InputStateAnnotation.State) => {
   const playerInput = (interrupt("player_input") as string).toLowerCase();
 
   if (playerInput === "quit") {
-    return new Command({
-      update: {
-        ended: "ended",
-      },
-      goto: NODES.END,
-    });
+    return {
+      classifiedInput: "quit",
+    };
   }
 
   const currentRoom = getRoom(state.currentAdventure, state.currentRoomKey);
@@ -63,15 +66,33 @@ export const Input = async (state: GraphState) => {
 
   const response = await model.withStructuredOutput(option).invoke(prompt);
 
-  const transformedInput = response.action;
+  return {
+    classifiedInput: response.action,
+  };
+};
 
-  if (transformedInput === "look") {
+const CommandRouter = async (state: typeof InputStateAnnotation.State) => {
+  const playerInput = state.classifiedInput;
+  const currentRoom = getRoom(state.currentAdventure, state.currentRoomKey);
+
+  if (playerInput === "quit") {
     return new Command({
-      goto: NODES.LOOK,
+      update: {
+        ended: "ended",
+      },
+      goto: NODES.END,
+      graph: Command.PARENT,
     });
   }
 
-  const action = currentRoom.actions.find((op) => op.name === transformedInput);
+  if (playerInput === "look") {
+    return new Command({
+      goto: NODES.LOOK,
+      graph: Command.PARENT,
+    });
+  }
+
+  const action = currentRoom.actions.find((op) => op.name === playerInput);
 
   if (action !== undefined) {
     return new Command({
@@ -79,6 +100,7 @@ export const Input = async (state: GraphState) => {
         lastAction: action,
       },
       goto: NODES.ACTION,
+      graph: Command.PARENT,
     });
   }
 
@@ -87,5 +109,14 @@ export const Input = async (state: GraphState) => {
       failedAction: playerInput,
     },
     goto: NODES.FAILURE,
+    graph: Command.PARENT,
   });
 };
+
+export const InputGraph = new StateGraph(InputStateAnnotation)
+  .addNode("input_classifier", InputClassifier)
+  .addNode("command_router", CommandRouter)
+  .addEdge("__start__", "input_classifier")
+  .addEdge("input_classifier", "command_router")
+  .addEdge("command_router", "__end__")
+  .compile();

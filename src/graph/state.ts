@@ -1,6 +1,5 @@
 import { Annotation, MessagesAnnotation } from "@langchain/langgraph";
-import { Room, Action, Adventure } from "../types";
-import { getRoom } from "../utils";
+import { Action, Adventure } from "../types";
 
 export const StateAnnotation = (adventure: Adventure) =>
   Annotation.Root({

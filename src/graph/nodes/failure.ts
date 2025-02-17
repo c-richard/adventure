@@ -1,11 +1,7 @@
-import { ChatOllama } from "@langchain/ollama";
 import { GraphState } from "../state";
 import { PromptTemplate } from "@langchain/core/prompts";
 import { getRoom } from "../../utils";
-
-const model = new ChatOllama({
-  model: "llama3.2:3b",
-});
+import { model } from "../../model";
 
 const promptTemplate = PromptTemplate.fromTemplate(
   `
