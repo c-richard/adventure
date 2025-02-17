@@ -3,9 +3,8 @@ import { GraphState } from "../state";
 import { NODES } from "../nodes";
 import { Renderer } from "../../renderer";
 import { getRoom } from "../../utils";
-import { Adventure } from "../../types";
 
-export const Action = (adventure: Adventure) => async (state: GraphState) => {
+export const Action = async (state: GraphState) => {
   const requiredAction = state.lastAction.conditions?.requiredAction;
 
   if (
@@ -22,12 +21,20 @@ export const Action = (adventure: Adventure) => async (state: GraphState) => {
 
   Renderer.actionEffect(state.lastAction);
 
+  const newAdventure = structuredClone(state.currentAdventure);
+
+  if (state.lastAction.roomDescription) {
+    newAdventure.rooms[state.currentRoomKey].description =
+      state.lastAction.roomDescription;
+  }
+
   return new Command({
     update: {
+      currentAdventure: newAdventure,
       actionHistory: state.lastAction.name,
-      currentRoom: state.lastAction.next_room
-        ? getRoom(adventure, state.lastAction.next_room)
-        : state.currentRoom,
+      currentRoomKey: state.lastAction.next_room
+        ? state.lastAction.next_room
+        : state.currentRoomKey,
       ended: state.lastAction.end_game,
     },
     goto: NODES.PLAYER_INPUT,

@@ -1,6 +1,7 @@
 import { ChatOllama } from "@langchain/ollama";
 import { GraphState } from "../state";
 import { PromptTemplate } from "@langchain/core/prompts";
+import { getRoom } from "../../utils";
 
 const model = new ChatOllama({
   model: "llama3.2:3b",
@@ -22,9 +23,11 @@ const promptTemplate = PromptTemplate.fromTemplate(
 export const Failure = async (state: GraphState) => {
   const failedAction = state.failedAction;
 
+  const currentRoom = getRoom(state.currentAdventure, state.currentRoomKey);
+
   const prompt = await promptTemplate.invoke({
-    roomTitle: state.currentRoom.title,
-    roomDescription: state.currentRoom.description,
+    roomTitle: currentRoom.title,
+    roomDescription: currentRoom.description,
     failedAction,
   });
 

@@ -1,6 +1,6 @@
 import { Renderer } from "../../renderer";
-import { Adventure } from "../../types";
+import { GraphState } from "../state";
 
-export const Intro = (adventure: Adventure) => async () => {
-  Renderer.intro(adventure.title, adventure.intro);
+export const Intro = async (state: GraphState) => {
+  Renderer.intro(state.currentAdventure.title, state.currentAdventure.intro);
 };

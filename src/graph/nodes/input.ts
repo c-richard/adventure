@@ -4,6 +4,7 @@ import { NODES } from "../nodes";
 import { ChatOllama } from "@langchain/ollama";
 import { PromptTemplate } from "@langchain/core/prompts";
 import { z } from "zod";
+import { getRoom } from "../../utils";
 
 const model = new ChatOllama({
   model: "llama3.2:3b",
@@ -36,19 +37,21 @@ export const Input = async (state: GraphState) => {
     });
   }
 
+  const currentRoom = getRoom(state.currentAdventure, state.currentRoomKey);
+
   const option = z.object({
     action: z.enum([
       "look",
-      ...state.currentRoom.actions.map((a) => a.name),
+      ...currentRoom.actions.map((a) => a.name),
       "unknown",
     ]),
   });
 
   const prompt = await promptTemplate.invoke({
-    roomTitle: state.currentRoom.title,
-    roomDescription: state.currentRoom.description,
+    roomTitle: currentRoom.title,
+    roomDescription: currentRoom.description,
     playerInput,
-    possibleActions: state.currentRoom.actions
+    possibleActions: currentRoom.actions
       .map(
         (a) =>
           `"${a.name}": Alternatives include ${a.alternativeNames
@@ -68,9 +71,7 @@ export const Input = async (state: GraphState) => {
     });
   }
 
-  const action = state.currentRoom.actions.find(
-    (op) => op.name === transformedInput
-  );
+  const action = currentRoom.actions.find((op) => op.name === transformedInput);
 
   if (action !== undefined) {
     return new Command({

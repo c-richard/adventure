@@ -4,9 +4,13 @@ import { getRoom } from "../utils";
 
 export const StateAnnotation = (adventure: Adventure) =>
   Annotation.Root({
-    currentRoom: Annotation<Room>({
+    currentAdventure: Annotation<Adventure>({
       reducer: (_, u) => u,
-      default: () => getRoom(adventure, adventure.initialRoom),
+      default: () => adventure,
+    }),
+    currentRoomKey: Annotation<string>({
+      reducer: (_, u) => u,
+      default: () => adventure.initialRoom,
     }),
     actionHistory: Annotation<string[]>({
       reducer: (s, u) => s.concat(u),

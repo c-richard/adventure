@@ -12,13 +12,13 @@ import { Action } from "./nodes/action";
 const adventure = adventureJson as Adventure;
 
 export const graph = new StateGraph(StateAnnotation(adventure))
-  .addNode(NODES.INTRO, Intro(adventure))
+  .addNode(NODES.INTRO, Intro)
   .addNode(NODES.PLAYER_INPUT, Input, {
     ends: ["__end__", NODES.LOOK, NODES.FAILURE, NODES.ACTION],
   })
   .addNode(NODES.LOOK, Look)
   .addNode(NODES.FAILURE, Failure)
-  .addNode(NODES.ACTION, Action(adventure), {
+  .addNode(NODES.ACTION, Action, {
     ends: [NODES.FAILURE, NODES.PLAYER_INPUT],
   })
   .addEdge("__start__", NODES.INTRO)
