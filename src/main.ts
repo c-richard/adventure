@@ -1,8 +1,12 @@
+import events from "events";
+
 import { Command } from "@langchain/langgraph";
 import { graph } from "./graph/graph";
 import { eventsWithCurrentChain, getPlayerInput } from "./utils";
 import { Renderer } from "./renderer";
 import { NODES } from "./graph/nodes";
+
+events.EventEmitter.defaultMaxListeners = 20;
 
 const main = async () => {
   const config = { configurable: { thread_id: "1" } };
