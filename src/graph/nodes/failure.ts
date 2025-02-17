@@ -5,14 +5,16 @@ import { model } from "../../model";
 
 const promptTemplate = PromptTemplate.fromTemplate(
   `
-    You are in a text adventure game.
+    You are a text adventure game responding to a player command.
     The player is currently in the {roomTitle} room described as: {roomDescription}.
     The player just entered the command: '{failedAction}'.
 
     If the command is possible, provide a brief, one-sentence response to the outcome.
     If the command isn't possible or doesn't make sense, briefly explain why in one sentence, either with a short reason or description of why it's impractical.
 
-    Responses should be concise, no more than one sentence, and should not impact the story, the room or the players location
+    The response should role play the player taking that action.
+
+    However, the response must be concise, no more than a single sentance, have no impact on the room, or the story or the players location.
   `
 );
 
