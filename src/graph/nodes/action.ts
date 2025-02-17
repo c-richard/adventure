@@ -2,7 +2,6 @@ import { Command } from "@langchain/langgraph";
 import { GraphState } from "../state";
 import { NODES } from "../nodes";
 import { Renderer } from "../../renderer";
-import { getRoom } from "../../utils";
 
 export const Action = async (state: GraphState) => {
   const requiredAction = state.lastAction.conditions?.requiredAction;

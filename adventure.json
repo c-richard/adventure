@@ -1,58 +1,96 @@
 {
-    "title": "The Forgotten Hall",
-    "intro": "You awake in a dimly lit room. Dust hangs in the air, and the musty smell of old stone fills your nose. A faint breeze comes from the north.",
-    "initialRoom": "chamber",
-    "rooms": {
-      "chamber": {
-        "key": "chamber",
-        "title": "Chamber",
-        "description": "You are in a small chamber. The walls are made of cold, gray stone, and the floor is covered in dust. There is a door to the north, and an old wooden chest sits in the corner.",
-        "actions": [
-          {
-            "name": "search",
-            "alternativeNames": [],
-            "result": "You see only dust and old stone. The chest looks like it hasn't been opened in ages."
-          },
-          {
-            "name": "open chest",
-            "alternativeNames": ["unlock chest", "open the chest", "pry open chest", "unseal chest", "unlatch chest", "lift lid", "crack open chest"],
-            "result": "The chest is empty, but it smells faintly of wood and age."
-          },
-          {
-            "name": "go north",
-            "alternativeNames": ["go door", "n", "enter door", "move north", "proceed north", "go through door"],
-            "result": "You go north into the library",
-            "next_room": "library"
+  "title": "The Forgotten Hall",
+  "intro": "You awake on a cold stone floor, your head pounding. The air is thick with dust, and the scent of aged parchment and mildew lingers. Flickering torchlight casts shifting shadows on the damp walls. Somewhere nearby, a soft draft whispers through unseen cracks.",
+  "initialRoom": "chamber",
+  "rooms": {
+    "chamber": {
+      "key": "chamber",
+      "title": "Abandoned Chamber",
+      "description": "You find yourself in a dimly lit stone chamber, its rough walls damp with age. Dust coats the floor, undisturbed for what feels like centuries. A heavy wooden door looms to the north, its iron handle rusted. In the far corner, an ancient wooden chest, its lid slightly ajar, seems to beckon you.",
+      "actions": [
+        {
+          "name": "search",
+          "alternativeNames": [],
+          "result": "You scour the chamber, but all you find is dust and the silent weight of forgotten time. The chest, however, seems strangely untouched by decay."
+        },
+        {
+          "name": "open chest",
+          "alternativeNames": [
+            "unlock chest",
+            "open the chest",
+            "pry open chest",
+            "unseal chest",
+            "unlatch chest",
+            "lift lid",
+            "crack open chest"
+          ],
+          "result": "The moment you lift the lid, an inky darkness bursts forth, swallowing the room in an unnatural void. A chorus of whispers fills your ears, growing louder until they become agonized screams. Your limbs turn to stone, your vision fades, and the last thing you feel is something slithering into your mouth. Then—nothing.",
+          "end_game": true
+        },
+        {
+          "name": "go north",
+          "alternativeNames": [
+            "go door",
+            "n",
+            "enter door",
+            "move north",
+            "proceed north",
+            "go through door"
+          ],
+          "result": "The door groans on its hinges as you step forward, entering the library.",
+          "next_room": "library"
+        }
+      ]
+    },
+    "library": {
+      "key": "library",
+      "title": "Decaying Library",
+      "description": "A vast, shadowy library stretches before you, its walls lined with towering bookshelves. Most of the books have long succumbed to time, their pages crumbling to dust. At the center of the room, bathed in eerie candlelight, rests a single tome on a heavy stone pedestal. Its leather cover is adorned with intricate carvings, though time has worn away its title. A door stands to the south, its frame warped and splintered.",
+      "actions": [
+        {
+          "name": "examine tome",
+          "alternativeNames": [
+            "inspect tome",
+            "look at tome",
+            "read tome",
+            "study tome",
+            "open tome",
+            "check tome",
+            "peruse tome"
+          ],
+          "result": "As you run your fingers over the tome’s worn cover, a soft click echoes through the chamber. A section of the bookshelf shifts, revealing a dark passage shrouded in shadows.",
+          "roomDescription": "A vast, shadowy library stretches before you, its walls lined with towering bookshelves. Most of the books have long succumbed to time, their pages crumbling to dust. At the center of the room, bathed in eerie candlelight, rests a single tome on a heavy stone pedestal. Its leather cover is adorned with intricate carvings, though time has worn away its title. A door stands to the south, its frame warped and splintered. One of the bookshelves has shifted, revealing a hidden passage leading into darkness."
+        },
+        {
+          "name": "go south",
+          "alternativeNames": [
+            "go door",
+            "s",
+            "enter door",
+            "move south",
+            "proceed south",
+            "exit south"
+          ],
+          "result": "You go south into the chamber",
+          "next_room": "chamber"
+        },
+        {
+          "name": "go passage",
+          "alternativeNames": [
+            "enter passage",
+            "walk passage",
+            "enter hidden passage",
+            "go through passage",
+            "step through passage",
+            "walk through secret passage"
+          ],
+          "result": "You walk through the hidden passage and escape the mansion. Well done!",
+          "end_game": true,
+          "conditions": {
+            "requiredAction": "examine tome"
           }
-        ]
-      },
-      "library": {
-        "key": "library",
-        "title": "Library",
-        "description": "You find yourself in a room lined with shelves, but most of the books are long rotted. A single tome rests on a pedestal in the center of the room. Its cover is intricately carved, but it’s difficult to read the title. There is a door to the south",
-        "actions": [
-          {
-            "name": "examine tome",
-            "alternativeNames": ["inspect tome", "look at tome", "read tome", "study tome", "open tome", "check tome", "peruse tome"],
-            "result": "You open the tome, and a hidden passage opens behind the bookshelf.",
-            "roomDescription": "You find yourself in a room lined with shelves, but most of the books are long rotted. A single tome rests on a pedestal in the center of the room. Its cover is intricately carved, but it’s difficult to read the title. There is a door to the south. One of the bookshelves has shifted, revealing a hidden passage leading into darkness."
-          },
-          {
-            "name": "go south",
-            "alternativeNames": ["go door", "s", "enter door", "move south", "proceed south", "exit south"],
-            "result": "You go south into the chamber",
-            "next_room": "chamber"
-          },
-          {
-            "name": "go passage",
-            "alternativeNames": ["enter passage", "walk passage", "enter hidden passage", "go through passage", "step through passage", "walk through secret passage"],
-            "result": "You walk through the hidden passage and escape the mansion. Well done!",
-            "end_game": true,
-            "conditions": {
-              "requiredAction": "examine tome"
-            }
-          }
-        ]
-      }
+        }
+      ]
     }
   }
+}
