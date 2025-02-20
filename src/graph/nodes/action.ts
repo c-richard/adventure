@@ -1,10 +1,11 @@
 import { Command } from "@langchain/langgraph";
-import { GraphState } from "../state";
-import { NODES } from "../nodes";
-import { Renderer } from "../../renderer";
-import { getRoom } from "../../utils";
+import { GraphState } from "../state.js";
+import { NODES } from "../nodes.js";
+import { Renderer } from "../../renderer.js";
+import { getRoom } from "../../utils.js";
 
 export const Action = async (state: GraphState) => {
+  const output = [];
   const requiredAction = state.lastAction.conditions?.requiredAction;
 
   if (
@@ -19,7 +20,7 @@ export const Action = async (state: GraphState) => {
     });
   }
 
-  Renderer.actionEffect(state.lastAction);
+  output.push(Renderer.actionEffect(state.lastAction));
 
   const newAdventure = structuredClone(state.currentAdventure);
 
@@ -29,7 +30,9 @@ export const Action = async (state: GraphState) => {
   }
 
   if (state.lastAction.next_room) {
-    Renderer.room(getRoom(state.currentAdventure, state.lastAction.next_room));
+    output.push(
+      Renderer.room(getRoom(state.currentAdventure, state.lastAction.next_room))
+    );
   }
 
   return new Command({
@@ -40,6 +43,7 @@ export const Action = async (state: GraphState) => {
         ? state.lastAction.next_room
         : state.currentRoomKey,
       ended: state.lastAction.end_game,
+      output,
     },
     goto: NODES.PLAYER_INPUT,
   });

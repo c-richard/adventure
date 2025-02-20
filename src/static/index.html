@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Adventure</title>
+    <script ype="text/javascript">
+        var messages = [];
+
+        function renderMessages() {
+            var chat = document.getElementById('chat');
+            chat.innerHTML = '';
+            messages.forEach(message => {
+                var div = document.createElement('div');
+                div.innerHTML = message;
+                chat.appendChild(div);
+            });
+        }
+
+        function getMessages() {
+            fetch('/chat')
+                .then(response => response.json())
+                .then(data => {
+                    messages = data;
+                    renderMessages();
+                });
+        }
+
+        function sendMessage() {
+            var message = document.getElementById('message').value;
+            fetch('/chat', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ text: message }) // Ensure the body is JSON formatted
+            })
+                .then(response => response.json())
+                .then(data => {
+                    messages = data;
+                    renderMessages();
+                });
+        }
+
+        getMessages();
+    </script>
+</head>
+<body>
+    <h1>Welcome to the Adventure</h1>
+    <p>This is a basic HTML page for the adventure project.</p>
+    <div>
+        <div>
+            <div id="chat"></div>
+            <div>
+                <input type="text" id="message" />
+                <button id="send" onClick="sendMessage()">Send</button>
+            </div>
+        </div>
+    </div>
+</body>
+</html></html>

@@ -4,12 +4,12 @@ import {
   Annotation,
   StateGraph,
 } from "@langchain/langgraph";
-import { NODES } from "../nodes";
 import { PromptTemplate } from "@langchain/core/prompts";
 import { z } from "zod";
-import { getRoom } from "../../utils";
-import { Adventure } from "../../types";
-import { model } from "../../model";
+import { NODES } from "../nodes.js";
+import { getRoom } from "../../utils.js";
+import { Adventure } from "../../types.js";
+import { model } from "../../model.js";
 
 const promptTemplate = PromptTemplate.fromTemplate(
   `

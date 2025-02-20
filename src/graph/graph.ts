@@ -1,13 +1,13 @@
-import adventureJson from "../../adventure.json";
-import { Adventure } from "../types";
+import adventureJson from "../../adventure.json" assert { type: "json" };
+import { Adventure } from "../types.js";
 import { MemorySaver, StateGraph } from "@langchain/langgraph";
-import { Intro } from "./nodes/intro";
-import { StateAnnotation } from "./state";
-import { NODES } from "./nodes";
-import { InputGraph } from "./nodes/input";
-import { Look } from "./nodes/look";
-import { Failure } from "./nodes/failure";
-import { Action } from "./nodes/action";
+import { Intro } from "./nodes/intro.js";
+import { StateAnnotation } from "./state.js";
+import { NODES } from "./nodes.js";
+import { InputGraph } from "./nodes/input.js";
+import { Look } from "./nodes/look.js";
+import { Failure } from "./nodes/failure.js";
+import { Action } from "./nodes/action.js";
 
 const adventure = adventureJson as Adventure;
 

@@ -1,7 +1,7 @@
-import { GraphState } from "../state";
 import { PromptTemplate } from "@langchain/core/prompts";
-import { getRoom } from "../../utils";
-import { model } from "../../model";
+import { GraphState } from "../state.js";
+import { getRoom } from "../../utils.js";
+import { model } from "../../model.js";
 
 const promptTemplate = PromptTemplate.fromTemplate(
   `
@@ -29,5 +29,7 @@ export const Failure = async (state: GraphState) => {
     failedAction,
   });
 
-  await model.invoke(prompt);
+  return {
+    output: [(await model.invoke(prompt)).content],
+  };
 };

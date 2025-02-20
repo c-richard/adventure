@@ -1,8 +1,10 @@
-import { GraphState } from "../state";
-import { Renderer } from "../../renderer";
-import { getRoom } from "../../utils";
+import { GraphState } from "../state.js";
+import { Renderer } from "../../renderer.js";
+import { getRoom } from "../../utils.js";
 
 export const Look = async (state: GraphState) => {
   const currentRoom = getRoom(state.currentAdventure, state.currentRoomKey);
-  Renderer.room(currentRoom);
+  return {
+    output: [Renderer.room(currentRoom)],
+  };
 };

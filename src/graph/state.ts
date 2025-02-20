@@ -1,5 +1,5 @@
-import { Annotation, MessagesAnnotation } from "@langchain/langgraph";
-import { Action, Adventure } from "../types";
+import { Annotation } from "@langchain/langgraph";
+import { Action, Adventure } from "../types.js";
 
 export const StateAnnotation = (adventure: Adventure) =>
   Annotation.Root({
@@ -18,7 +18,10 @@ export const StateAnnotation = (adventure: Adventure) =>
     ended: Annotation<string>,
     failedAction: Annotation<string>,
     lastAction: Annotation<Action>,
-    ...MessagesAnnotation.spec,
+    output: Annotation<string[]>({
+      reducer: (s, u) => [...s, ...u],
+      default: () => [],
+    }),
   });
 
 export type GraphState = ReturnType<typeof StateAnnotation>["State"];
