@@ -5,9 +5,7 @@ export type Action = {
   roomDescription?: string;
   next_room?: string;
   end_game?: boolean;
-  conditions?: {
-    requiredAction?: string;
-  };
+  condition?: string;
 };
 
 export type Room = {
