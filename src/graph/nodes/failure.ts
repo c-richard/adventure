@@ -14,7 +14,13 @@ const promptTemplate = PromptTemplate.fromTemplate(
 
     The response should role play the player taking that action.
 
-    However, the response must be concise, no more than a single sentance, have no impact on the room, or the story or the players location.
+    However:
+      - the response must be concise
+      - no more than a single sentance
+      - have no impact on the room
+      - have no impact on the story
+      - have no impact on the players location.
+      - have no impact on the players position in the room
   `
 );
 
