@@ -86,7 +86,7 @@
           ],
           "result": "You walk through the hidden passage and escape the mansion. Well done!",
           "end_game": true,
-          "conditions": "player must have examined the tome"
+          "condition": "player must have examined the tome"
         }
       ]
     }
