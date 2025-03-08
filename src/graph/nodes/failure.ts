@@ -10,17 +10,13 @@ const promptTemplate = PromptTemplate.fromTemplate(
     The player just entered the command: '{failedAction}'.
 
     If the command is possible, provide a brief, one-sentence response to the outcome.
-    If the command isn't possible or doesn't make sense, briefly explain why in one sentence, either with a short reason or description of why it's impractical.
+    If the command isn't possible or doesn't make sense, provide a brief, one-sentence response explaining why, clearly indicating that the action cannot be taken.
 
-    The response should role play the player taking that action.
-
-    However:
-      - the response must be concise
-      - no more than a single sentance
-      - have no impact on the room
-      - have no impact on the story
-      - have no impact on the players location.
-      - have no impact on the players position in the room
+    The response should role-play the player's attempt at the action but must strictly adhere to these rules:
+      - The response must be concise and simple (no more than one sentence).
+      - If the action is impossible, clearly state why without implying any change in the game world.
+      - The response cannot introduce new elements not present in the room description.
+      - The response cannot change the room, story, player's location, or position.
   `
 );
 
