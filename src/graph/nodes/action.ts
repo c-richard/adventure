@@ -23,6 +23,29 @@ const promptTemplate = PromptTemplate.fromTemplate(
 `
 );
 
+const descriptionUpdatePromptTemplate = PromptTemplate.fromTemplate(
+  `  
+  The current room description is:
+  {currentRoomDescription}
+
+  The player is attempting to perform the action: "{actionName}".
+
+  The action has the effect: {actionEffect}
+
+  Write a new room description for the current room after the action has been taken.
+
+  The new description must be similar to the old one so players dont get confused.
+
+  It must describe what the room looks like after looking at it.
+
+  If the action taken is minimal just return the original description.
+
+  Only add to the description if the action has a visible effect on the room.
+
+  Just return the room description
+`
+);
+
 const successStructuredOutput = z.object({
   success: z
     .enum(["true", "false"])
@@ -56,10 +79,17 @@ export const Action = async (state: GraphState) => {
 
   const newAdventure = structuredClone(state.currentAdventure);
 
-  if (state.lastAction.roomDescription) {
-    newAdventure.rooms[state.currentRoomKey].description =
-      state.lastAction.roomDescription;
-  }
+  const prompt = await descriptionUpdatePromptTemplate.invoke({
+    currentRoomDescription:
+      newAdventure.rooms[state.currentRoomKey].description,
+    actionName: state.lastAction.name,
+    actionEffect: state.lastAction.result,
+  });
+
+  const response = await model.invoke(prompt);
+
+  newAdventure.rooms[state.currentRoomKey].description =
+    response.content.toString();
 
   if (state.lastAction.next_room) {
     output.push(

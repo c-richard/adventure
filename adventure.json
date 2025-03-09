@@ -58,8 +58,7 @@
             "check tome",
             "peruse tome"
           ],
-          "result": "As you run your fingers over the tome’s worn cover, a soft click echoes through the chamber. A section of the bookshelf shifts, revealing a dark passage shrouded in shadows.",
-          "roomDescription": "A vast, shadowy library stretches before you, its walls lined with towering bookshelves. Most of the books have long succumbed to time, their pages crumbling to dust. At the center of the room, bathed in eerie candlelight, rests a single tome on a heavy stone pedestal. Its leather cover is adorned with intricate carvings, though time has worn away its title. A door stands to the south, its frame warped and splintered. One of the bookshelves has shifted, revealing a hidden passage leading into darkness."
+          "result": "As you run your fingers over the tome’s worn cover, a soft click echoes through the chamber. A section of the bookshelf shifts, revealing a dark passage shrouded in shadows."
         },
         {
           "name": "go south",
